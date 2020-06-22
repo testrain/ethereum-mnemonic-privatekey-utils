@@ -4,25 +4,25 @@ const keythereum = require('keythereum');
 
 exports.debug = false;
 
-function getPrivateKeyFromMnemonic(mnemonic) {
+function getPrivateKeysFromMnemonic(mnemonic, num=1) {
 	const hdwallet = hdkey.fromMasterSeed(bip39.mnemonicToSeedSync(mnemonic));
 	const wallet_hdpath = "m/44'/60'/0'/0/";
+  let pkList = [];
 
-	const wallet = hdwallet.derivePath(wallet_hdpath + '0').getWallet();
-	const privateKey = wallet._privKey.toString('hex');
-	const account = '0x' + wallet.getAddress().toString('hex').toUpperCase();
+  for (let i = 0; i < num; i++) {
+	  const wallet = hdwallet.derivePath(wallet_hdpath + i).getWallet();
+	  const privateKey = wallet._privKey.toString('hex');
+    pkList.push(privateKey);
+	  const account = '0x' + wallet.getAddress().toString('hex').toUpperCase();
 
-	if (exports.debug)
-		console.log({
-			mnemonic: mnemonic,
-			privateKey: privateKey,
-			account: account
-		});
-
-	return privateKey;
+	  if (exports.debug) {
+		  console.log("privateKey: %s \naccount: %s\n", privateKey, account);
+    }
+  }
+	return pkList;
 }
 
-exports.getPrivateKeyFromMnemonic = getPrivateKeyFromMnemonic;
+exports.getPrivateKeysFromMnemonic = getPrivateKeysFromMnemonic;
 
 function getPrivateKeyFromRandom() {
 	const params = { keyBytes: 32, ivBytes: 16 };
@@ -58,10 +58,9 @@ function getPrivateKeyFromKeystore(keystore, password) {
 
 exports.getPrivateKeyFromKeystore = getPrivateKeyFromKeystore;
 
-function getKeystoreFromPrivateKey(privateKey, password) {
+function getKeystoresFromPrivateKey(privateKeyList, password) {
 	const params = { keyBytes: 32, ivBytes: 16 };
 	const dk = keythereum.create(params);
-
 	const options = {
 		kdf: 'pbkdf2',
 		cipher: 'aes-128-ctr',
@@ -72,18 +71,17 @@ function getKeystoreFromPrivateKey(privateKey, password) {
 		}
 	};
 
-	// const keystore = keythereum.dump(password, dk.privateKey, dk.salt, dk.iv, options);
-	const keystore = keythereum.dump(password, privateKey, dk.salt, dk.iv, options);
+  let keystoreList = [];
+	for (let i = 0; i < privateKeyList.length; i++) {
+    // const keystore = keythereum.dump(password, dk.privateKey, dk.salt, dk.iv, options);
+	  const keystore = keythereum.dump(password, privateKeyList[i], dk.salt, dk.iv, options);
+    keystoreList.push(keystore);
 
-	if (exports.debug) {
-		console.log({
-			privateKey: privateKey,
-			password: password,
-			keystore: keystore
-		});
-	}
-
-	return keystore;
+	  if (exports.debug) {
+		  console.log("keystore: %j\n", keystore);
+	  }
+  }
+	return keystoreList;
 }
 
-exports.getKeystoreFromPrivateKey = getKeystoreFromPrivateKey;
+exports.getKeystoresFromPrivateKey = getKeystoresFromPrivateKey;
