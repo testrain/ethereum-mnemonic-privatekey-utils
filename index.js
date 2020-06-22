@@ -70,6 +70,7 @@ function getKeystoresFromPrivateKey(privateKeyList, password) {
 	for (let i = 0; i < privateKeyList.length; i++) {
     // const keystore = keythereum.dump(password, dk.privateKey, dk.salt, dk.iv, options);
 	  const keystore = keythereum.dump(password, privateKeyList[i], dk.salt, dk.iv, options);
+    keythereum.exportToFile(keystore);
     keystoreList.push(keystore);
 
 	  if (exports.debug) {
