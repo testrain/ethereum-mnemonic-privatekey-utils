@@ -42,3 +42,6 @@ const account = keystore.address;
 console.log('account address: %s', account);
 
 ```
+
+### HD derivation paths:
+https://github.com/ethereum/EIPs/issues/84
