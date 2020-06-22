@@ -62,13 +62,8 @@ function getKeystoresFromPrivateKey(privateKeyList, password) {
 	const params = { keyBytes: 32, ivBytes: 16 };
 	const dk = keythereum.create(params);
 	const options = {
-		kdf: 'pbkdf2',
+		kdf: 'scrypt',
 		cipher: 'aes-128-ctr',
-		kdfparams: {
-			c: 262144,
-			dklen: 32,
-			prf: 'hmac-sha256'
-		}
 	};
 
   let keystoreList = [];
